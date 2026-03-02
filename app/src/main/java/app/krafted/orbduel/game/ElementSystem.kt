@@ -3,7 +3,6 @@ package app.krafted.orbduel.game
 import androidx.compose.ui.graphics.Color
 import app.krafted.orbduel.R
 
-
 enum class Element(
     val displayName: String,
     val color: Color,
@@ -18,7 +17,6 @@ enum class Element(
     NEBULA  ("Nebula",   Color(0xFF66AAFF), R.drawable.orb_nebula)
 }
 
-
 fun Element.weakness(): Element = when (this) {
     Element.PSYCHIC  -> Element.COSMIC
     Element.COSMIC   -> Element.ASTEROID
@@ -29,24 +27,13 @@ fun Element.weakness(): Element = when (this) {
     Element.NEBULA   -> Element.PSYCHIC
 }
 
-// ─────────────────────────────────────────────────────────────
-// Battle outcome
-// ─────────────────────────────────────────────────────────────
 enum class BattleOutcome { WIN, LOSE, DRAW }
 
-/**
- * Resolve a single round from the attacker's perspective.
- *
- * - DRAW : same element
- * - WIN  : defender is attacker's weakness target
- * - LOSE : everything else
- */
 fun resolveBattle(attacker: Element, defender: Element): BattleOutcome = when {
     attacker == defender            -> BattleOutcome.DRAW
     defender == attacker.weakness() -> BattleOutcome.WIN
     else                            -> BattleOutcome.LOSE
 }
-
 
 object DamageValues {
     const val WIN_DAMAGE  = 30

@@ -33,6 +33,8 @@ data class BattleUiState(
     val player2Name:        String     = "AI"
 )
 
+const val MAX_ROUNDS = 10
+
 fun resolveRound(
     p1Orb:        Element,
     p2Orb:        Element,
@@ -46,18 +48,26 @@ fun resolveRound(
     when (p1Outcome) {
         BattleOutcome.WIN  -> { damageTakenByP1 = 0;                      damageTakenByP2 = DamageValues.WIN_DAMAGE  }
         BattleOutcome.LOSE -> { damageTakenByP1 = DamageValues.WIN_DAMAGE; damageTakenByP2 = 0                       }
-        BattleOutcome.DRAW -> { damageTakenByP1 = DamageValues.LOSE_DAMAGE; damageTakenByP2 = DamageValues.LOSE_DAMAGE }
+        BattleOutcome.DRAW -> { damageTakenByP1 = DamageValues.DRAW_DAMAGE; damageTakenByP2 = DamageValues.DRAW_DAMAGE }
     }
 
     val newP1Hp = (currentState.player1Hp - damageTakenByP1).coerceAtLeast(0)
     val newP2Hp = (currentState.player2Hp - damageTakenByP2).coerceAtLeast(0)
 
+    val newRoundCount = currentState.roundCount + 1
+    val maxRoundsReached = newRoundCount >= MAX_ROUNDS
+
     val winner: Player? = when {
         newP1Hp <= 0 && newP2Hp <= 0 -> null
         newP1Hp <= 0                 -> Player.PLAYER2
         newP2Hp <= 0                 -> Player.PLAYER1
+        maxRoundsReached && newP1Hp > newP2Hp  -> Player.PLAYER1
+        maxRoundsReached && newP2Hp > newP1Hp  -> Player.PLAYER2
+        maxRoundsReached                       -> null
         else                         -> null
     }
+
+    val gameOver = winner != null || maxRoundsReached
 
     return currentState.copy(
         player1Hp          = newP1Hp,
@@ -66,7 +76,7 @@ fun resolveRound(
         player2SelectedOrb = null,
         lastRoundResult    = RoundResult(p1Orb, p2Orb, p1Outcome, damageTakenByP1, damageTakenByP2),
         matchWinner        = winner,
-        roundCount         = currentState.roundCount + 1,
-        currentTurn        = if (winner != null) TurnPhase.RESULT else TurnPhase.REVEAL
+        roundCount         = newRoundCount,
+        currentTurn        = if (gameOver) TurnPhase.RESULT else TurnPhase.REVEAL
     )
 }

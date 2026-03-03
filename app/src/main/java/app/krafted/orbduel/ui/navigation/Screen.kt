@@ -13,6 +13,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import app.krafted.orbduel.game.GameMode
+import app.krafted.orbduel.ui.BattleScreen
 import app.krafted.orbduel.ui.HomeScreen
 import app.krafted.orbduel.ui.ModeSelectScreen
 import app.krafted.orbduel.ui.theme.DarkBg
@@ -68,7 +69,10 @@ fun OrbDuelNavHost(
         }
 
         composable(Screen.Battle.route) {
-            Box(Modifier.fillMaxSize().background(DarkBg))
+            BattleScreen(
+                viewModel = battleViewModel,
+                onNavigateToReveal = { navController.navigate(Screen.Reveal.route) }
+            )
         }
 
         composable(Screen.Reveal.route) {

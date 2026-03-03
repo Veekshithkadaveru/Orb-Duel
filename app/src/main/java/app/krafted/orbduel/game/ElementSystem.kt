@@ -32,7 +32,8 @@ enum class BattleOutcome { WIN, LOSE, DRAW }
 fun resolveBattle(attacker: Element, defender: Element): BattleOutcome = when {
     attacker == defender            -> BattleOutcome.DRAW
     defender == attacker.weakness() -> BattleOutcome.WIN
-    else                            -> BattleOutcome.LOSE
+    attacker == defender.weakness() -> BattleOutcome.LOSE
+    else                            -> BattleOutcome.DRAW
 }
 
 object DamageValues {

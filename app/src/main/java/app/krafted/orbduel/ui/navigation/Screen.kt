@@ -11,6 +11,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import app.krafted.orbduel.ui.HomeScreen
 import app.krafted.orbduel.ui.theme.DarkBg
 
 sealed class Screen(val route: String) {
@@ -33,7 +34,11 @@ fun OrbDuelNavHost(
         startDestination = Screen.Home.route
     ) {
         composable(Screen.Home.route) {
-            Box(Modifier.fillMaxSize().background(DarkBg))
+            HomeScreen(
+                onPlayVsAi     = { navController.navigate(Screen.ModeSelect.createRoute("VS_AI")) },
+                onPlayVsPlayer = { navController.navigate(Screen.ModeSelect.createRoute("VS_PLAYER")) },
+                onLeaderboard  = { navController.navigate(Screen.Leaderboard.route) }
+            )
         }
 
         composable(

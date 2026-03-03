@@ -1,6 +1,8 @@
 package app.krafted.orbduel.game
 
-class AiOpponent {
+import javax.inject.Inject
+
+class AiOpponent @Inject constructor() {
 
     private val orbHistory = mutableMapOf<Element, Int>()
 

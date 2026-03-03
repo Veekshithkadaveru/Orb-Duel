@@ -51,13 +51,11 @@ fun HomeScreen(
     onPlayVsPlayer: () -> Unit,
     onLeaderboard: () -> Unit
 ) {
-    // ── Animations ────────────────────────────────────────────────────────
     val infiniteTransition = rememberInfiniteTransition(label = "title")
 
-    // Bloom layers pulse in and out
     val bloomAlpha by infiniteTransition.animateFloat(
         initialValue = 0.08f,
-        targetValue  = 0.26f,
+        targetValue = 0.26f,
         animationSpec = infiniteRepeatable(
             tween(1400, easing = FastOutSlowInEasing),
             RepeatMode.Reverse
@@ -65,10 +63,9 @@ fun HomeScreen(
         label = "bloom"
     )
 
-    // White shimmer peak sweeps left → right across the gradient text
     val shimmer by infiniteTransition.animateFloat(
         initialValue = 0f,
-        targetValue  = 1f,
+        targetValue = 1f,
         animationSpec = infiniteRepeatable(
             tween(2800, easing = LinearEasing),
             RepeatMode.Restart
@@ -76,7 +73,6 @@ fun HomeScreen(
         label = "shimmer"
     )
 
-    // Base gradient when shimmer is at edges; moving peak when it's mid-sweep
     val titleBrush = if (shimmer < 0.05f || shimmer > 0.95f) {
         Brush.linearGradient(
             listOf(NeonMagenta, Color(0xFFFF88FF), Color.White, Color(0xFF88FFFF), NeonCyan)
@@ -84,16 +80,15 @@ fun HomeScreen(
     } else {
         Brush.linearGradient(
             colorStops = arrayOf(
-                0f                                       to NeonMagenta,
+                0f to NeonMagenta,
                 (shimmer - 0.15f).coerceAtLeast(0.01f) to Color(0xFFFF88FF),
-                shimmer                                  to Color.White,
-                (shimmer + 0.15f).coerceAtMost(0.99f)  to Color(0xFF88FFFF),
-                1f                                       to NeonCyan
+                shimmer to Color.White,
+                (shimmer + 0.15f).coerceAtMost(0.99f) to Color(0xFF88FFFF),
+                1f to NeonCyan
             )
         )
     }
 
-    // ── UI ────────────────────────────────────────────────────────────────
     Box(modifier = Modifier.fillMaxSize()) {
 
         Image(
@@ -117,7 +112,6 @@ fun HomeScreen(
             verticalArrangement = Arrangement.Center
         ) {
 
-            // ── Top framing line ──────────────────────────────────────────
             Box(
                 modifier = Modifier
                     .fillMaxWidth(0.75f)
@@ -131,81 +125,74 @@ fun HomeScreen(
 
             Spacer(Modifier.height(20.dp))
 
-            // ── Title ─────────────────────────────────────────────────────
-            // 56sp + 4sp letter spacing keeps "ORB DUEL" on one line on all phones.
-            // Three stacked layers: two animated bloom clouds + animated shimmer text.
             Box(contentAlignment = Alignment.Center) {
-
-                // Layer 1 — wide magenta bloom cloud (pulses)
                 Text(
                     text = "ORB DUEL",
                     softWrap = false,
                     style = TextStyle(
-                        fontSize     = 56.sp,
-                        fontWeight   = FontWeight.Black,
-                        color        = NeonMagenta.copy(alpha = bloomAlpha),
+                        fontSize = 56.sp,
+                        fontWeight = FontWeight.Black,
+                        color = NeonMagenta.copy(alpha = bloomAlpha),
                         letterSpacing = 4.sp,
-                        shadow       = Shadow(color = NeonMagenta, blurRadius = 160f)
+                        shadow = Shadow(color = NeonMagenta, blurRadius = 160f)
                     )
                 )
-
-                // Layer 2 — secondary cyan bloom (pulses at 60 % of magenta alpha)
                 Text(
                     text = "ORB DUEL",
                     softWrap = false,
                     style = TextStyle(
-                        fontSize     = 56.sp,
-                        fontWeight   = FontWeight.Black,
-                        color        = NeonCyan.copy(alpha = bloomAlpha * 0.6f),
+                        fontSize = 56.sp,
+                        fontWeight = FontWeight.Black,
+                        color = NeonCyan.copy(alpha = bloomAlpha * 0.6f),
                         letterSpacing = 4.sp,
-                        shadow       = Shadow(color = NeonCyan, blurRadius = 90f)
+                        shadow = Shadow(color = NeonCyan, blurRadius = 90f)
                     )
                 )
-
-                // Layer 3 — gradient-filled sharp text with sweeping shimmer
                 Text(
                     text = "ORB DUEL",
                     softWrap = false,
                     style = TextStyle(
-                        brush        = titleBrush,
-                        fontSize     = 56.sp,
-                        fontWeight   = FontWeight.Black,
+                        brush = titleBrush,
+                        fontSize = 56.sp,
+                        fontWeight = FontWeight.Black,
                         letterSpacing = 4.sp,
-                        shadow       = Shadow(color = NeonMagenta, blurRadius = 20f)
+                        shadow = Shadow(color = NeonMagenta, blurRadius = 20f)
                     )
                 )
             }
 
             Spacer(Modifier.height(10.dp))
 
-            // ── Subtitle with dot accents ─────────────────────────────────
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
                 repeat(3) {
-                    Box(Modifier.size(4.dp).background(NeonCyan, RoundedCornerShape(2.dp)))
+                    Box(Modifier
+                        .size(4.dp)
+                        .background(NeonCyan, RoundedCornerShape(2.dp)))
                     Spacer(Modifier.width(4.dp))
                 }
                 Text(
                     text = "COSMIC BATTLE ARENA",
                     style = TextStyle(
-                        fontSize     = 10.sp,
-                        fontWeight   = FontWeight.Bold,
-                        color        = NeonCyan,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = NeonCyan,
                         letterSpacing = 4.sp,
-                        shadow       = Shadow(color = NeonCyan, blurRadius = 14f)
+                        shadow = Shadow(color = NeonCyan, blurRadius = 14f)
                     )
                 )
                 repeat(3) {
                     Spacer(Modifier.width(4.dp))
-                    Box(Modifier.size(4.dp).background(NeonCyan, RoundedCornerShape(2.dp)))
+                    Box(Modifier
+                        .size(4.dp)
+                        .background(NeonCyan, RoundedCornerShape(2.dp)))
                 }
             }
 
             Spacer(Modifier.height(16.dp))
 
-            // ── Gradient divider ──────────────────────────────────────────
             Box(
                 modifier = Modifier
                     .fillMaxWidth(0.72f)
@@ -222,12 +209,11 @@ fun HomeScreen(
 
             Spacer(Modifier.height(52.dp))
 
-            // ── Buttons ───────────────────────────────────────────────────
-            GameButton(label = "PLAY  VS  AI",     color = NeonMagenta, onClick = onPlayVsAi)
+            GameButton(label = "PLAY  VS  AI", color = NeonMagenta, onClick = onPlayVsAi)
             Spacer(Modifier.height(14.dp))
-            GameButton(label = "PLAY  VS  PLAYER", color = NeonCyan,    onClick = onPlayVsPlayer)
+            GameButton(label = "PLAY  VS  PLAYER", color = NeonCyan, onClick = onPlayVsPlayer)
             Spacer(Modifier.height(14.dp))
-            GameButton(label = "LEADERBOARD",      color = NeonOrange,  onClick = onLeaderboard)
+            GameButton(label = "LEADERBOARD", color = NeonOrange, onClick = onLeaderboard)
         }
     }
 }
@@ -248,9 +234,9 @@ private fun GameButton(
             .fillMaxWidth()
             .height(58.dp)
             .shadow(
-                elevation    = 14.dp,
-                shape        = buttonShape,
-                spotColor    = color,
+                elevation = 14.dp,
+                shape = buttonShape,
+                spotColor = color,
                 ambientColor = color.copy(alpha = 0.45f)
             )
             .clip(buttonShape)
@@ -267,19 +253,19 @@ private fun GameButton(
                 text = "◆",
                 style = TextStyle(
                     fontSize = 7.sp,
-                    color    = color,
-                    shadow   = Shadow(color = color, blurRadius = 12f)
+                    color = color,
+                    shadow = Shadow(color = color, blurRadius = 12f)
                 )
             )
             Spacer(Modifier.width(12.dp))
             Text(
                 text = label,
                 style = TextStyle(
-                    fontSize     = 13.sp,
-                    fontWeight   = FontWeight.Bold,
-                    color        = Color.White,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
                     letterSpacing = 3.sp,
-                    shadow       = Shadow(color = color, blurRadius = 16f)
+                    shadow = Shadow(color = color, blurRadius = 16f)
                 )
             )
             Spacer(Modifier.width(12.dp))
@@ -287,8 +273,8 @@ private fun GameButton(
                 text = "◆",
                 style = TextStyle(
                     fontSize = 7.sp,
-                    color    = color,
-                    shadow   = Shadow(color = color, blurRadius = 12f)
+                    color = color,
+                    shadow = Shadow(color = color, blurRadius = 12f)
                 )
             )
         }

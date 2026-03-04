@@ -114,7 +114,6 @@ fun RevealScreen(
         
         delay(200)
 
-        // Step 3: Resolution & Push
         when (result.player1Outcome) {
             BattleOutcome.WIN -> {
                 launch { p2OffsetX.animateTo(screenWidthPx, tween(500)) }
@@ -265,7 +264,7 @@ fun RevealScreen(
                 .padding(bottom = 64.dp, start = 32.dp, end = 32.dp)
         ) {
             val isGameOver = uiState.matchWinner != null
-            val buttonText = if (isGameOver) "PLAY AGAIN" else "NEXT ROUND"
+            val buttonText = if (isGameOver) "VIEW RESULTS" else "NEXT ROUND"
             val buttonColor = if (isGameOver) NeonMagenta else NeonCyan
             
             GameButton(

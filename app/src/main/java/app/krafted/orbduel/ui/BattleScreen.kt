@@ -67,7 +67,7 @@ fun BattleScreen(
     val isResultPhase = uiState.currentTurn == TurnPhase.RESULT
 
     androidx.compose.runtime.LaunchedEffect(uiState.currentTurn) {
-        if (uiState.currentTurn == TurnPhase.REVEAL) {
+        if (uiState.currentTurn == TurnPhase.REVEAL || uiState.currentTurn == TurnPhase.RESULT) {
             onNavigateToReveal()
         }
     }

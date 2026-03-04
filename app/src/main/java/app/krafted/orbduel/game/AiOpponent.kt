@@ -23,12 +23,14 @@ class AiOpponent @Inject constructor() {
 
     private fun pickMedium(playerLastOrb: Element?): Element {
         if (playerLastOrb == null || Math.random() < 0.6) return pickEasy()
-        return playerLastOrb.weakness()
+
+        return Element.entries.first { it.weakness() == playerLastOrb }
     }
 
     private fun pickHard(): Element {
         if (orbHistory.isEmpty()) return pickEasy()
         val mostUsed = orbHistory.maxByOrNull { it.value }!!.key
-        return mostUsed.weakness()
+
+        return Element.entries.first { it.weakness() == mostUsed }
     }
 }

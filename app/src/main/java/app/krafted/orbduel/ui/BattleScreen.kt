@@ -66,6 +66,12 @@ fun BattleScreen(
     val isRevealPhase = uiState.currentTurn == TurnPhase.REVEAL
     val isResultPhase = uiState.currentTurn == TurnPhase.RESULT
 
+    androidx.compose.runtime.LaunchedEffect(uiState.currentTurn) {
+        if (uiState.currentTurn == TurnPhase.REVEAL) {
+            onNavigateToReveal()
+        }
+    }
+
     val bgRes = backgrounds[uiState.roundCount % backgrounds.size]
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -113,7 +119,7 @@ fun BattleScreen(
                 Spacer(Modifier.height(12.dp))
 
                 val p2Orb = uiState.lastRoundResult?.player2Orb
-                if ((isRevealPhase || isResultPhase) && p2Orb != null) {
+                if (isResultPhase && p2Orb != null) {
                     Image(
                         painter = painterResource(p2Orb.drawableRes),
                         contentDescription = p2Orb.displayName,
@@ -240,40 +246,7 @@ fun BattleScreen(
                 )
             }
 
-            if (isRevealPhase) {
-                val result = uiState.lastRoundResult
-                if (result != null) {
-                    val outcomeText = when (result.player1Outcome) {
-                        BattleOutcome.WIN -> "YOU WIN THIS ROUND!"
-                        BattleOutcome.LOSE -> "YOU LOSE THIS ROUND!"
-                        BattleOutcome.DRAW -> "DRAW!"
-                    }
-                    val outcomeColor = when (result.player1Outcome) {
-                        BattleOutcome.WIN -> NeonGreen
-                        BattleOutcome.LOSE -> NeonRed
-                        BattleOutcome.DRAW -> NeonOrange
-                    }
-                    Text(
-                        text = outcomeText,
-                        style = TextStyle(
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = outcomeColor,
-                            letterSpacing = 2.sp,
-                            shadow = Shadow(color = outcomeColor, blurRadius = 16f)
-                        )
-                    )
-                }
-
-                Spacer(Modifier.height(8.dp))
-
-                GameButton(
-                    label = "NEXT ROUND",
-                    color = NeonCyan,
-                    enabled = true,
-                    onClick = { viewModel.nextRound() }
-                )
-            } else if (isResultPhase) {
+            if (isResultPhase) {
                 val winnerText = when (uiState.matchWinner) {
                     app.krafted.orbduel.game.Player.PLAYER1 -> "PLAYER 1 WINS!"
                     app.krafted.orbduel.game.Player.PLAYER2 -> "${uiState.player2Name} WINS!"
@@ -308,7 +281,7 @@ fun BattleScreen(
                 GameButton(
                     label = "CONFIRM",
                     color = NeonCyan,
-                    enabled = uiState.player1SelectedOrb != null,
+                    enabled = uiState.currentTurn == TurnPhase.PLAYER1_SELECT && uiState.player1SelectedOrb != null,
                     onClick = { viewModel.confirmPlayer1Selection() }
                 )
             }

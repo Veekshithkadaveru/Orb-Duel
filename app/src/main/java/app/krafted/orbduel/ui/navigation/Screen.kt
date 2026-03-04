@@ -16,6 +16,7 @@ import app.krafted.orbduel.game.GameMode
 import app.krafted.orbduel.ui.BattleScreen
 import app.krafted.orbduel.ui.HomeScreen
 import app.krafted.orbduel.ui.ModeSelectScreen
+import app.krafted.orbduel.ui.RevealScreen
 import app.krafted.orbduel.ui.theme.DarkBg
 import app.krafted.orbduel.viewmodel.BattleViewModel
 
@@ -76,7 +77,18 @@ fun OrbDuelNavHost(
         }
 
         composable(Screen.Reveal.route) {
-            Box(Modifier.fillMaxSize().background(DarkBg))
+            RevealScreen(
+                viewModel = battleViewModel,
+                onNextRound = { navController.navigate(Screen.Battle.route) {
+                    popUpTo(Screen.Battle.route) { inclusive = true }
+                } },
+                onMatchOver = {
+                    battleViewModel.resetMatch()
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Home.route) { inclusive = true }
+                    }
+                }
+            )
         }
 
         composable(Screen.Result.route) {

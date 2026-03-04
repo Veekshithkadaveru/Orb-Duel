@@ -7,9 +7,10 @@ import androidx.room.PrimaryKey
 data class MatchRecord(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val winnerName: String,
-    val gameMode: String,      // "VS_AI" or "VS_PLAYER"
-    val difficulty: String,    // "EASY" / "MEDIUM" / "HARD" / "N/A"
+    val gameMode: String,
+    val difficulty: String,
     val roundsPlayed: Int,
+    val remainingHp: Int = 0,
     val timestamp: Long = System.currentTimeMillis()
 )
 

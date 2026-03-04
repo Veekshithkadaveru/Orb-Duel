@@ -144,6 +144,11 @@ class BattleViewModel @Inject constructor(
             Player.PLAYER2 -> state.player2Name
         }
 
+        val winnerHp = when (winner) {
+            Player.PLAYER1 -> state.player1Hp
+            Player.PLAYER2 -> state.player2Hp
+        }
+
         val gameModeString = state.gameMode.name
         val difficultyString = when (state.gameMode) {
             GameMode.VS_AI -> state.aiDifficulty.name
@@ -154,7 +159,8 @@ class BattleViewModel @Inject constructor(
             winnerName = winnerName,
             gameMode = gameModeString,
             difficulty = difficultyString,
-            roundsPlayed = state.roundCount
+            roundsPlayed = state.roundCount,
+            remainingHp = winnerHp
         )
 
         viewModelScope.launch {

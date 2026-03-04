@@ -15,11 +15,13 @@ import androidx.navigation.navArgument
 import app.krafted.orbduel.game.GameMode
 import app.krafted.orbduel.ui.BattleScreen
 import app.krafted.orbduel.ui.HomeScreen
+import app.krafted.orbduel.ui.LeaderboardScreen
 import app.krafted.orbduel.ui.ModeSelectScreen
 import app.krafted.orbduel.ui.RevealScreen
 import app.krafted.orbduel.ui.ResultScreen
 import app.krafted.orbduel.ui.theme.DarkBg
 import app.krafted.orbduel.viewmodel.BattleViewModel
+import app.krafted.orbduel.viewmodel.LeaderboardViewModel
 
 sealed class Screen(val route: String) {
     object Home : Screen("home")
@@ -57,8 +59,8 @@ fun OrbDuelNavHost(
             val mode = backStackEntry.arguments?.getString("mode") ?: "VS_AI"
             ModeSelectScreen(
                 mode = mode,
-                onDifficultySelected = { difficulty ->
-                    battleViewModel.setGameMode(GameMode.VS_AI)
+                onDifficultySelected = { difficulty, playerName ->
+                    battleViewModel.setGameMode(GameMode.VS_AI, player1Name = playerName)
                     battleViewModel.setAiDifficulty(difficulty)
                     navController.navigate(Screen.Battle.route)
                 },
@@ -113,7 +115,11 @@ fun OrbDuelNavHost(
         }
 
         composable(Screen.Leaderboard.route) {
-            Box(Modifier.fillMaxSize().background(DarkBg))
+            val leaderboardViewModel: LeaderboardViewModel = hiltViewModel()
+            LeaderboardScreen(
+                viewModel = leaderboardViewModel,
+                onBack = { navController.popBackStack() }
+            )
         }
     }
 }

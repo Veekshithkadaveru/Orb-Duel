@@ -49,7 +49,7 @@ import app.krafted.orbduel.ui.theme.NeonRed
 @Composable
 fun ModeSelectScreen(
     mode: String,
-    onDifficultySelected: (Difficulty) -> Unit,
+    onDifficultySelected: (Difficulty, String) -> Unit,
     onStartPlayerGame: (String, String) -> Unit,
     onBack: () -> Unit
 ) {
@@ -101,9 +101,11 @@ fun ModeSelectScreen(
 }
 
 @Composable
-private fun AiModeContent(onDifficultySelected: (Difficulty) -> Unit) {
+private fun AiModeContent(onDifficultySelected: (Difficulty, String) -> Unit) {
+    var playerName by remember { mutableStateOf("") }
+
     Text(
-        text = "SELECT DIFFICULTY",
+        text = "PLAYER VS AI",
         style = TextStyle(
             fontSize = 22.sp,
             fontWeight = FontWeight.Bold,
@@ -115,16 +117,38 @@ private fun AiModeContent(onDifficultySelected: (Difficulty) -> Unit) {
 
     Spacer(Modifier.height(40.dp))
 
-    SelectButton(label = "EASY", color = NeonGreen) {
-        onDifficultySelected(Difficulty.EASY)
+    OutlinedTextField(
+        value = playerName,
+        onValueChange = { playerName = it },
+        label = { Text("Your Name") },
+        singleLine = true,
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = NeonMagenta,
+            unfocusedBorderColor = NeonMagenta.copy(alpha = 0.4f),
+            focusedLabelColor = NeonMagenta,
+            unfocusedLabelColor = NeonMagenta.copy(alpha = 0.6f),
+            cursorColor = NeonMagenta,
+            focusedTextColor = Color.White,
+            unfocusedTextColor = Color.White,
+            focusedContainerColor = CardSurface,
+            unfocusedContainerColor = CardSurface
+        ),
+        textStyle = TextStyle(fontSize = 16.sp, letterSpacing = 1.sp),
+        modifier = Modifier.fillMaxWidth()
+    )
+
+    Spacer(Modifier.height(24.dp))
+
+    SelectButton(label = "EASY", color = NeonGreen, enabled = playerName.isNotBlank()) {
+        onDifficultySelected(Difficulty.EASY, playerName.trim())
     }
     Spacer(Modifier.height(14.dp))
-    SelectButton(label = "MEDIUM", color = NeonOrange) {
-        onDifficultySelected(Difficulty.MEDIUM)
+    SelectButton(label = "MEDIUM", color = NeonOrange, enabled = playerName.isNotBlank()) {
+        onDifficultySelected(Difficulty.MEDIUM, playerName.trim())
     }
     Spacer(Modifier.height(14.dp))
-    SelectButton(label = "HARD", color = NeonRed) {
-        onDifficultySelected(Difficulty.HARD)
+    SelectButton(label = "HARD", color = NeonRed, enabled = playerName.isNotBlank()) {
+        onDifficultySelected(Difficulty.HARD, playerName.trim())
     }
 }
 

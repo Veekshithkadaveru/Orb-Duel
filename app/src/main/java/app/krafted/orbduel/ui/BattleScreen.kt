@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -202,7 +203,7 @@ fun BattleScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 val p1Orb = if (isPlayer2Select) {
-                    null // Hide Player 1's selection during Player 2's turn
+                    null
                 } else {
                     uiState.player1SelectedOrb ?: uiState.lastRoundResult?.player1Orb
                 }
@@ -345,8 +346,22 @@ private fun GameButton(
     onClick: () -> Unit
 ) {
     val buttonShape = RoundedCornerShape(4.dp)
-    val alpha = if (enabled) 1f else 0.35f
-    val displayColor = color.copy(alpha = alpha)
+    
+    val infiniteTransition = androidx.compose.animation.core.rememberInfiniteTransition(label = "pulse")
+    val pulseAlpha by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 0.6f,
+        animationSpec = androidx.compose.animation.core.infiniteRepeatable(
+            animation = androidx.compose.animation.core.tween(800, easing = androidx.compose.animation.core.FastOutSlowInEasing),
+            repeatMode = androidx.compose.animation.core.RepeatMode.Reverse
+        ),
+        label = "pulseAlpha"
+    )
+
+    val baseAlpha = if (enabled) 1f else 0.35f
+    val displayColor = color.copy(alpha = baseAlpha)
+    val textAlpha = if (enabled) pulseAlpha else baseAlpha
+
     val gradient = Brush.verticalGradient(
         colors = listOf(displayColor.copy(alpha = 0.30f), displayColor.copy(alpha = 0.06f))
     )
@@ -387,7 +402,7 @@ private fun GameButton(
                 style = TextStyle(
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White.copy(alpha = alpha),
+                    color = Color.White.copy(alpha = textAlpha),
                     letterSpacing = 3.sp,
                     shadow = Shadow(color = displayColor, blurRadius = 16f)
                 )

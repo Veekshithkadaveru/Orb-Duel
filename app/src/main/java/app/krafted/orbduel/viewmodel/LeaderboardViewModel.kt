@@ -3,7 +3,7 @@ package app.krafted.orbduel.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.krafted.orbduel.data.MatchDao
-import app.krafted.orbduel.data.MatchRecord
+import app.krafted.orbduel.data.LeaderboardEntry
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
@@ -15,13 +15,10 @@ class LeaderboardViewModel @Inject constructor(
     matchDao: MatchDao
 ) : ViewModel() {
 
-    val topRecords: StateFlow<List<MatchRecord>> =
-        matchDao
-            .getTopRecords()
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = emptyList()
-            )
+    val topRecords: StateFlow<List<LeaderboardEntry>> = matchDao.getLeaderboard()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
 }
-

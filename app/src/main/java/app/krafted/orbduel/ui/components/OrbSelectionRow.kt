@@ -13,6 +13,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,11 +39,28 @@ fun OrbSelectionRow(
     ) {
         items(Element.entries) { element ->
             val isSelected = element == selectedOrb
-            val alpha = when {
+            
+            val targetAlpha = when {
                 !enabled -> 0.3f
                 isSelected -> 1f
                 else -> 0.6f
             }
+            val targetScale = if (isSelected) 1.2f else 1.0f
+
+            val animatedAlpha by androidx.compose.animation.core.animateFloatAsState(
+                targetValue = targetAlpha,
+                animationSpec = androidx.compose.animation.core.tween(200),
+                label = "orbAlpha"
+            )
+            
+            val animatedScale by androidx.compose.animation.core.animateFloatAsState(
+                targetValue = targetScale,
+                animationSpec = androidx.compose.animation.core.spring(
+                    dampingRatio = androidx.compose.animation.core.Spring.DampingRatioMediumBouncy,
+                    stiffness = androidx.compose.animation.core.Spring.StiffnessLow
+                ),
+                label = "orbScale"
+            )
 
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -55,11 +74,9 @@ fun OrbSelectionRow(
                     modifier = Modifier
                         .size(64.dp)
                         .graphicsLayer {
-                            this.alpha = alpha
-                            if (isSelected) {
-                                scaleX = 1.2f
-                                scaleY = 1.2f
-                            }
+                            alpha = animatedAlpha
+                            scaleX = animatedScale
+                            scaleY = animatedScale
                         }
                         .then(
                             if (isSelected) {
@@ -75,7 +92,7 @@ fun OrbSelectionRow(
                 Text(
                     text = element.displayName,
                     fontSize = 9.sp,
-                    color = element.color.copy(alpha = alpha)
+                    color = element.color.copy(alpha = animatedAlpha)
                 )
             }
         }

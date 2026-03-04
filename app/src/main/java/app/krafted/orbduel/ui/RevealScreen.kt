@@ -82,6 +82,8 @@ fun RevealScreen(
     val p2OffsetX = remember { Animatable(screenWidthPx) }
     val clashScale = remember { Animatable(1f) }
     val glowAlpha = remember { Animatable(0f) }
+    val damageOffsetY = remember { Animatable(0f) }
+    val damageAlpha = remember { Animatable(0f) }
     
     var showDamage by remember { mutableStateOf(false) }
     var showDraw by remember { mutableStateOf(false) }
@@ -104,15 +106,14 @@ fun RevealScreen(
         
         delay(800)
 
-        // Clash Pulse & Impact Glow logic
         launch {
             glowAlpha.animateTo(1f, tween(150))
             glowAlpha.animateTo(0f, tween(300))
         }
-        clashScale.animateTo(1.5f, tween(150))
-        clashScale.animateTo(1.0f, tween(150))
+        clashScale.animateTo(1.6f, spring(dampingRatio = 0.4f, stiffness = Spring.StiffnessHigh))
+        clashScale.animateTo(1.0f, tween(200))
         
-        delay(200)
+        delay(250)
 
         when (result.player1Outcome) {
             BattleOutcome.WIN -> {
@@ -129,6 +130,13 @@ fun RevealScreen(
             }
             BattleOutcome.DRAW -> {
                 showDraw = true
+            }
+        }
+        if (result.player1Outcome != BattleOutcome.DRAW) {
+            launch {
+                damageAlpha.animateTo(1f, tween(200))
+                damageOffsetY.animateTo(-120f, tween(800, easing = androidx.compose.animation.core.FastOutLinearInEasing))
+                damageAlpha.animateTo(0f, tween(200))
             }
         }
         
@@ -153,8 +161,7 @@ fun RevealScreen(
                 .fillMaxSize()
                 .background(DarkBg.copy(alpha = 0.75f))
         )
-        
-        // Impact Glow effect in center
+
         Box(
             modifier = Modifier
                 .align(Alignment.Center)
@@ -181,19 +188,19 @@ fun RevealScreen(
                     .size(100.dp)
             )
 
-            AnimatedVisibility(
-                visible = showDamage && result.player1Outcome == BattleOutcome.LOSE,
-                enter = fadeIn() + slideInVertically { it / 2 },
-                modifier = Modifier.align(Alignment.TopCenter).offset(y = (-40).dp)
-            ) {
+            if (showDamage && result.player1Outcome == BattleOutcome.LOSE) {
                 Text(
                     text = "-${result.damageTakenByP1} HP",
                     style = TextStyle(
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
+                        fontSize = 28.sp,
+                        fontWeight = FontWeight.Black,
                         color = NeonRed,
-                        shadow = Shadow(color = NeonRed, blurRadius = 12f)
-                    )
+                        shadow = Shadow(color = NeonRed, blurRadius = 14f)
+                    ),
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .offset(y = damageOffsetY.value.dp)
+                        .alpha(damageAlpha.value)
                 )
             }
         }
@@ -211,24 +218,23 @@ fun RevealScreen(
                     .size(100.dp)
             )
 
-            AnimatedVisibility(
-                visible = showDamage && result.player1Outcome == BattleOutcome.WIN,
-                enter = fadeIn() + slideInVertically { it / 2 },
-                modifier = Modifier.align(Alignment.TopCenter).offset(y = (-40).dp)
-            ) {
+            if (showDamage && result.player1Outcome == BattleOutcome.WIN) {
                 Text(
                     text = "-${result.damageTakenByP2} HP",
                     style = TextStyle(
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
+                        fontSize = 28.sp,
+                        fontWeight = FontWeight.Black,
                         color = NeonCyan,
-                        shadow = Shadow(color = NeonCyan, blurRadius = 12f)
-                    )
+                        shadow = Shadow(color = NeonCyan, blurRadius = 14f)
+                    ),
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .offset(y = damageOffsetY.value.dp)
+                        .alpha(damageAlpha.value)
                 )
             }
         }
 
-        // Draw Banner
         AnimatedVisibility(
             visible = showDraw,
             enter = fadeIn(tween(500)),
@@ -271,7 +277,6 @@ fun RevealScreen(
             )
         }
 
-        // Next Round / Continue Button
         AnimatedVisibility(
             visible = showNextButton,
             enter = fadeIn(tween(500)),

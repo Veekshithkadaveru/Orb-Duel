@@ -12,9 +12,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -55,9 +58,27 @@ fun HpBar(
         label = "hp-bar-color"
     )
 
+    val shakeOffset = androidx.compose.runtime.remember { androidx.compose.animation.core.Animatable(0f) }
+    var previousHp by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(hp) }
+
+    androidx.compose.runtime.LaunchedEffect(hp) {
+        if (hp < previousHp) {
+            // Shake animation
+            shakeOffset.animateTo(15f, animationSpec = tween(50))
+            shakeOffset.animateTo(-15f, animationSpec = tween(50))
+            shakeOffset.animateTo(10f, animationSpec = tween(50))
+            shakeOffset.animateTo(-10f, animationSpec = tween(50))
+            shakeOffset.animateTo(0f, animationSpec = tween(50))
+        }
+        previousHp = hp
+    }
+
     val barShape = RoundedCornerShape(7.dp)
 
-    Column(modifier = modifier.fillMaxWidth()) {
+    Column(modifier = modifier
+        .fillMaxWidth()
+        .offset(x = shakeOffset.value.dp)
+    ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,

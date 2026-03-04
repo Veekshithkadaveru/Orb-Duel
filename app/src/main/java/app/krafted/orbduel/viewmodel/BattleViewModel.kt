@@ -31,11 +31,13 @@ class BattleViewModel @Inject constructor(
 
     fun setGameMode(
         mode: GameMode,
+        player1Name: String = "Player 1",
         player2Name: String = if (mode == GameMode.VS_AI) "AI" else "Player 2"
     ) {
         _uiState.value = BattleUiState(
             gameMode = mode,
             aiDifficulty = _uiState.value.aiDifficulty,
+            player1Name = player1Name,
             player2Name = player2Name
         )
         hasSavedResultForCurrentMatch = false
@@ -60,8 +62,15 @@ class BattleViewModel @Inject constructor(
         when (state.gameMode) {
             GameMode.VS_AI -> handleAiTurnAfterPlayerConfirm(state)
             GameMode.VS_PLAYER -> {
-                _uiState.value = state.copy(currentTurn = TurnPhase.PLAYER2_SELECT)
+                _uiState.value = state.copy(currentTurn = TurnPhase.HANDOFF)
             }
+        }
+    }
+
+    fun confirmHandoff() {
+        val state = _uiState.value
+        if (state.currentTurn == TurnPhase.HANDOFF) {
+            _uiState.value = state.copy(currentTurn = TurnPhase.PLAYER2_SELECT)
         }
     }
 
@@ -102,6 +111,7 @@ class BattleViewModel @Inject constructor(
         _uiState.value = BattleUiState(
             gameMode = state.gameMode,
             aiDifficulty = state.aiDifficulty,
+            player1Name = state.player1Name,
             player2Name = state.player2Name
         )
         hasSavedResultForCurrentMatch = false
@@ -130,7 +140,7 @@ class BattleViewModel @Inject constructor(
         hasSavedResultForCurrentMatch = true
 
         val winnerName = when (winner) {
-            Player.PLAYER1 -> "Player 1"
+            Player.PLAYER1 -> state.player1Name
             Player.PLAYER2 -> state.player2Name
         }
 

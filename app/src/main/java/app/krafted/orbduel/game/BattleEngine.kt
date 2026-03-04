@@ -2,6 +2,7 @@ package app.krafted.orbduel.game
 
 enum class TurnPhase {
     PLAYER1_SELECT,
+    HANDOFF,
     PLAYER2_SELECT,
     REVEAL,
     RESULT
@@ -30,6 +31,7 @@ data class BattleUiState(
     val roundCount:         Int        = 0,
     val gameMode:           GameMode   = GameMode.VS_AI,
     val aiDifficulty:       Difficulty = Difficulty.MEDIUM,
+    val player1Name:        String     = "Player 1",
     val player2Name:        String     = "AI"
 )
 

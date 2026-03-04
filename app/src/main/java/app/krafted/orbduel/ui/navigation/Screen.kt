@@ -62,8 +62,8 @@ fun OrbDuelNavHost(
                     battleViewModel.setAiDifficulty(difficulty)
                     navController.navigate(Screen.Battle.route)
                 },
-                onStartPlayerGame = { player2Name ->
-                    battleViewModel.setGameMode(GameMode.VS_PLAYER, player2Name)
+                onStartPlayerGame = { player1Name, player2Name ->
+                    battleViewModel.setGameMode(GameMode.VS_PLAYER, player1Name, player2Name)
                     navController.navigate(Screen.Battle.route)
                 },
                 onBack = { navController.popBackStack() }

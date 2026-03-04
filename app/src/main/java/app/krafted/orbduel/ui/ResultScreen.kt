@@ -73,7 +73,7 @@ fun ResultScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     val winnerName = when (uiState.matchWinner) {
-        Player.PLAYER1 -> "PLAYER 1"
+        Player.PLAYER1 -> uiState.player1Name.uppercase()
         Player.PLAYER2 -> uiState.player2Name.uppercase()
         null -> null
     }

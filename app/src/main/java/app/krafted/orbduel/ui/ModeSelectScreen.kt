@@ -50,7 +50,7 @@ import app.krafted.orbduel.ui.theme.NeonRed
 fun ModeSelectScreen(
     mode: String,
     onDifficultySelected: (Difficulty) -> Unit,
-    onStartPlayerGame: (String) -> Unit,
+    onStartPlayerGame: (String, String) -> Unit,
     onBack: () -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
@@ -129,7 +129,8 @@ private fun AiModeContent(onDifficultySelected: (Difficulty) -> Unit) {
 }
 
 @Composable
-private fun PlayerModeContent(onStartPlayerGame: (String) -> Unit) {
+private fun PlayerModeContent(onStartPlayerGame: (String, String) -> Unit) {
+    var player1Name by remember { mutableStateOf("") }
     var player2Name by remember { mutableStateOf("") }
 
     Text(
@@ -144,6 +145,28 @@ private fun PlayerModeContent(onStartPlayerGame: (String) -> Unit) {
     )
 
     Spacer(Modifier.height(40.dp))
+
+    OutlinedTextField(
+        value = player1Name,
+        onValueChange = { player1Name = it },
+        label = { Text("Player 1 Name") },
+        singleLine = true,
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = NeonCyan,
+            unfocusedBorderColor = NeonCyan.copy(alpha = 0.4f),
+            focusedLabelColor = NeonCyan,
+            unfocusedLabelColor = NeonCyan.copy(alpha = 0.6f),
+            cursorColor = NeonCyan,
+            focusedTextColor = Color.White,
+            unfocusedTextColor = Color.White,
+            focusedContainerColor = CardSurface,
+            unfocusedContainerColor = CardSurface
+        ),
+        textStyle = TextStyle(fontSize = 16.sp, letterSpacing = 1.sp),
+        modifier = Modifier.fillMaxWidth()
+    )
+
+    Spacer(Modifier.height(16.dp))
 
     OutlinedTextField(
         value = player2Name,
@@ -170,9 +193,9 @@ private fun PlayerModeContent(onStartPlayerGame: (String) -> Unit) {
     SelectButton(
         label = "START GAME",
         color = NeonCyan,
-        enabled = player2Name.isNotBlank()
+        enabled = player1Name.isNotBlank() && player2Name.isNotBlank()
     ) {
-        onStartPlayerGame(player2Name.trim())
+        onStartPlayerGame(player1Name.trim(), player2Name.trim())
     }
 }
 

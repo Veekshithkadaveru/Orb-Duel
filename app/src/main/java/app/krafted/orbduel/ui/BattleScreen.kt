@@ -65,6 +65,8 @@ fun BattleScreen(
 
     val isRevealPhase = uiState.currentTurn == TurnPhase.REVEAL
     val isResultPhase = uiState.currentTurn == TurnPhase.RESULT
+    val isHandoffPhase = uiState.currentTurn == TurnPhase.HANDOFF
+    val isPlayer2Select = uiState.currentTurn == TurnPhase.PLAYER2_SELECT
 
     androidx.compose.runtime.LaunchedEffect(uiState.currentTurn) {
         if (uiState.currentTurn == TurnPhase.REVEAL || uiState.currentTurn == TurnPhase.RESULT) {
@@ -199,8 +201,11 @@ fun BattleScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                val p1Orb = uiState.player1SelectedOrb
-                    ?: uiState.lastRoundResult?.player1Orb
+                val p1Orb = if (isPlayer2Select) {
+                    null // Hide Player 1's selection during Player 2's turn
+                } else {
+                    uiState.player1SelectedOrb ?: uiState.lastRoundResult?.player1Orb
+                }
                 if (p1Orb != null) {
                     Image(
                         painter = painterResource(p1Orb.drawableRes),
@@ -241,7 +246,7 @@ fun BattleScreen(
 
                 HpBar(
                     hp = uiState.player1Hp,
-                    label = "Player 1",
+                    label = uiState.player1Name,
                     modifier = Modifier.padding(horizontal = 8.dp)
                 )
             }
@@ -271,18 +276,61 @@ fun BattleScreen(
                     enabled = true,
                     onClick = { viewModel.resetMatch() }
                 )
+            } else if (isHandoffPhase) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 32.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = "✅ ${uiState.player1Name} is ready!",
+                        style = TextStyle(
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = NeonGreen,
+                            shadow = Shadow(color = NeonGreen, blurRadius = 12f)
+                        )
+                    )
+                    Spacer(Modifier.height(16.dp))
+                    Text(
+                        text = "Hand the phone to ${uiState.player2Name}",
+                        style = TextStyle(
+                            fontSize = 16.sp,
+                            color = Color.White
+                        )
+                    )
+                    Spacer(Modifier.height(32.dp))
+                    GameButton(
+                        label = "${uiState.player2Name}: PICK ORB",
+                        color = NeonCyan,
+                        enabled = true,
+                        onClick = { viewModel.confirmHandoff() }
+                    )
+                }
             } else {
+                val isP1Turn = uiState.currentTurn == TurnPhase.PLAYER1_SELECT
+                val isP2Turn = uiState.currentTurn == TurnPhase.PLAYER2_SELECT
+
                 OrbSelectionRow(
-                    selectedOrb = uiState.player1SelectedOrb,
-                    onOrbSelected = { viewModel.selectPlayer1Orb(it) },
-                    enabled = uiState.currentTurn == TurnPhase.PLAYER1_SELECT
+                    selectedOrb = if (isP1Turn) uiState.player1SelectedOrb else uiState.player2SelectedOrb,
+                    onOrbSelected = { orb ->
+                        if (isP1Turn) viewModel.selectPlayer1Orb(orb)
+                        else if (isP2Turn) viewModel.selectPlayer2Orb(orb)
+                    },
+                    enabled = isP1Turn || isP2Turn
                 )
 
                 GameButton(
                     label = "CONFIRM",
                     color = NeonCyan,
-                    enabled = uiState.currentTurn == TurnPhase.PLAYER1_SELECT && uiState.player1SelectedOrb != null,
-                    onClick = { viewModel.confirmPlayer1Selection() }
+                    enabled = (isP1Turn && uiState.player1SelectedOrb != null) ||
+                              (isP2Turn && uiState.player2SelectedOrb != null),
+                    onClick = {
+                        if (isP1Turn) viewModel.confirmPlayer1Selection()
+                        else if (isP2Turn) viewModel.confirmPlayer2Selection()
+                    }
                 )
             }
         }

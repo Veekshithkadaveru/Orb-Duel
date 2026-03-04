@@ -236,11 +236,27 @@ fun RevealScreen(
         ) {
             val isGameOver = uiState.matchWinner != null
             
-            val (bannerText, bannerColor) = when {
-                isGameOver -> Pair("MATCH OVER!", NeonMagenta)
-                result.player1Outcome == BattleOutcome.WIN -> Pair("YOU WIN!", NeonGreen)
-                result.player1Outcome == BattleOutcome.LOSE -> Pair("YOU LOSE!", NeonRed)
-                else -> Pair("DRAW!", NeonOrange)
+            val bannerText = if (isGameOver) {
+                "MATCH OVER!"
+            } else if (uiState.gameMode == app.krafted.orbduel.game.GameMode.VS_PLAYER) {
+                when (result.player1Outcome) {
+                    BattleOutcome.WIN -> "${uiState.player1Name.uppercase()} WINS!"
+                    BattleOutcome.LOSE -> "${uiState.player2Name.uppercase()} WINS!"
+                    else -> "DRAW!"
+                }
+            } else {
+                when (result.player1Outcome) {
+                    BattleOutcome.WIN -> "YOU WIN!"
+                    BattleOutcome.LOSE -> "YOU LOSE!"
+                    else -> "DRAW!"
+                }
+            }
+            
+            val bannerColor = when {
+                isGameOver -> NeonMagenta
+                result.player1Outcome == BattleOutcome.WIN -> NeonGreen
+                result.player1Outcome == BattleOutcome.LOSE -> NeonRed
+                else -> NeonOrange
             }
             
             Text(

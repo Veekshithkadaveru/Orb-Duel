@@ -19,11 +19,13 @@ import app.krafted.orbduel.ui.LeaderboardScreen
 import app.krafted.orbduel.ui.ModeSelectScreen
 import app.krafted.orbduel.ui.RevealScreen
 import app.krafted.orbduel.ui.ResultScreen
+import app.krafted.orbduel.ui.SplashScreen
 import app.krafted.orbduel.ui.theme.DarkBg
 import app.krafted.orbduel.viewmodel.BattleViewModel
 import app.krafted.orbduel.viewmodel.LeaderboardViewModel
 
 sealed class Screen(val route: String) {
+    object Splash : Screen("splash")
     object Home : Screen("home")
     object ModeSelect : Screen("mode_select/{mode}") {
         fun createRoute(mode: String) = "mode_select/$mode"
@@ -42,8 +44,16 @@ fun OrbDuelNavHost(
 ) {
     NavHost(
         navController = navController,
-        startDestination = Screen.Home.route
+        startDestination = Screen.Splash.route
     ) {
+        composable(Screen.Splash.route) {
+            SplashScreen(onSplashFinished = {
+                navController.navigate(Screen.Home.route) {
+                    popUpTo(Screen.Splash.route) { inclusive = true }
+                }
+            })
+        }
+
         composable(Screen.Home.route) {
             HomeScreen(
                 onPlayVsAi = { navController.navigate(Screen.ModeSelect.createRoute("VS_AI")) },

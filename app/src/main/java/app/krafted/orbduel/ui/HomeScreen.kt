@@ -6,10 +6,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -20,6 +23,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.krafted.orbduel.R
@@ -46,6 +50,11 @@ fun HomeScreen(
         label = "title"
     )
 
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    val isCompact = screenWidth < 360.dp
+    val titleSize = if (isCompact) 42.sp else 56.sp
+    val hPad = if (isCompact) 20.dp else 28.dp
+
     Box(modifier = Modifier.fillMaxSize()) {
 
         Image(
@@ -64,7 +73,8 @@ fun HomeScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 28.dp),
+                .windowInsetsPadding(WindowInsets.systemBars)
+                .padding(horizontal = hPad),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -81,7 +91,7 @@ fun HomeScreen(
                     text = "ORB DUEL",
                     softWrap = false,
                     style = TextStyle(
-                        fontSize = 56.sp,
+                        fontSize = titleSize,
                         fontWeight = FontWeight.Black,
                         color = NeonMagenta.copy(alpha = bloomAlpha),
                         letterSpacing = 4.sp,
@@ -92,7 +102,7 @@ fun HomeScreen(
                     text = "ORB DUEL",
                     softWrap = false,
                     style = TextStyle(
-                        fontSize = 56.sp,
+                        fontSize = titleSize,
                         fontWeight = FontWeight.Black,
                         color = NeonCyan.copy(alpha = bloomAlpha * 0.6f),
                         letterSpacing = 4.sp,
@@ -104,7 +114,7 @@ fun HomeScreen(
                     softWrap = false,
                     style = TextStyle(
                         brush = titleBrush,
-                        fontSize = 56.sp,
+                        fontSize = titleSize,
                         fontWeight = FontWeight.Black,
                         letterSpacing = 4.sp,
                         shadow = Shadow(color = NeonMagenta, blurRadius = 20f)

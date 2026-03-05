@@ -2,29 +2,23 @@ package app.krafted.orbduel.ui
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
-import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,9 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
@@ -49,6 +41,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.min
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.krafted.orbduel.R
@@ -78,9 +71,21 @@ fun RevealScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val result = uiState.lastRoundResult ?: return
 
-    val screenWidthDf = LocalConfiguration.current.screenWidthDp.dp
-    val screenWidthPx = with(LocalDensity.current) { screenWidthDf.toPx() }
-    
+    val config = LocalConfiguration.current
+    val screenWidthDp = config.screenWidthDp.dp
+    val screenHeightDp = config.screenHeightDp.dp
+    val screenWidthPx = with(LocalDensity.current) { screenWidthDp.toPx() }
+    val isCompact = screenHeightDp < 640.dp
+
+    // Scale sizes relative to screen
+    val orbSize = min(screenWidthDp * 0.25f, 100.dp)
+    val glowSize = min(screenWidthDp * 0.75f, 300.dp)
+    val orbSpreadPx = screenWidthPx * 0.15f
+    val bannerOffsetY = -(screenHeightDp * 0.13f)
+    val damageFloatTarget = -(screenHeightDp.value * 0.15f)
+    val bottomPad = if (isCompact) 32.dp else 64.dp
+    val hPad = if (isCompact) 16.dp else 32.dp
+
     // Animation States
     val p1OffsetX = remember { Animatable(-screenWidthPx) }
     val p2OffsetX = remember { Animatable(screenWidthPx) }
@@ -88,7 +93,7 @@ fun RevealScreen(
     val glowAlpha = remember { Animatable(0f) }
     val damageOffsetY = remember { Animatable(0f) }
     val damageAlpha = remember { Animatable(0f) }
-    
+
     var showDamage by remember { mutableStateOf(false) }
     var showBanner by remember { mutableStateOf(false) }
     var showNextButton by remember { mutableStateOf(false) }
@@ -97,17 +102,17 @@ fun RevealScreen(
 
         launch {
             p1OffsetX.animateTo(
-                targetValue = -120f,
+                targetValue = -orbSpreadPx,
                 animationSpec = spring(dampingRatio = 0.7f, stiffness = Spring.StiffnessLow)
             )
         }
         launch {
             p2OffsetX.animateTo(
-                targetValue = 120f,
+                targetValue = orbSpreadPx,
                 animationSpec = spring(dampingRatio = 0.7f, stiffness = Spring.StiffnessLow)
             )
         }
-        
+
         delay(800)
 
         launch {
@@ -116,7 +121,7 @@ fun RevealScreen(
         }
         clashScale.animateTo(1.6f, spring(dampingRatio = 0.4f, stiffness = Spring.StiffnessHigh))
         clashScale.animateTo(1.0f, tween(200))
-        
+
         delay(250)
 
         when (result.player1Outcome) {
@@ -139,14 +144,13 @@ fun RevealScreen(
         if (result.player1Outcome != BattleOutcome.DRAW) {
             launch {
                 damageAlpha.animateTo(1f, tween(200))
-                damageOffsetY.animateTo(-120f, tween(800, easing = androidx.compose.animation.core.FastOutLinearInEasing))
+                damageOffsetY.animateTo(damageFloatTarget, tween(800, easing = FastOutLinearInEasing))
                 damageAlpha.animateTo(0f, tween(200))
             }
         }
-        
+
         delay(600)
         showNextButton = true
-
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -166,7 +170,7 @@ fun RevealScreen(
         Box(
             modifier = Modifier
                 .align(Alignment.Center)
-                .size(300.dp)
+                .size(glowSize)
                 .alpha(glowAlpha.value)
                 .background(
                     Brush.radialGradient(
@@ -185,15 +189,14 @@ fun RevealScreen(
             Image(
                 painter = painterResource(result.player1Orb.drawableRes),
                 contentDescription = result.player1Orb.displayName,
-                modifier = Modifier
-                    .size(100.dp)
+                modifier = Modifier.size(orbSize)
             )
 
             if (showDamage && result.player1Outcome == BattleOutcome.LOSE) {
                 Text(
                     text = "-${result.damageTakenByP1} HP",
                     style = TextStyle(
-                        fontSize = 28.sp,
+                        fontSize = if (isCompact) 22.sp else 28.sp,
                         fontWeight = FontWeight.Black,
                         color = NeonRed,
                         shadow = Shadow(color = NeonRed, blurRadius = 14f)
@@ -215,15 +218,14 @@ fun RevealScreen(
             Image(
                 painter = painterResource(result.player2Orb.drawableRes),
                 contentDescription = result.player2Orb.displayName,
-                modifier = Modifier
-                    .size(100.dp)
+                modifier = Modifier.size(orbSize)
             )
 
             if (showDamage && result.player1Outcome == BattleOutcome.WIN) {
                 Text(
                     text = "-${result.damageTakenByP2} HP",
                     style = TextStyle(
-                        fontSize = 28.sp,
+                        fontSize = if (isCompact) 22.sp else 28.sp,
                         fontWeight = FontWeight.Black,
                         color = NeonCyan,
                         shadow = Shadow(color = NeonCyan, blurRadius = 14f)
@@ -239,10 +241,10 @@ fun RevealScreen(
         AnimatedVisibility(
             visible = showBanner,
             enter = fadeIn(tween(500)),
-            modifier = Modifier.align(Alignment.Center).offset(y = (-100).dp)
+            modifier = Modifier.align(Alignment.Center).offset(y = bannerOffsetY)
         ) {
             val isGameOver = uiState.matchWinner != null || uiState.roundCount >= MAX_ROUNDS
-            
+
             val bannerText = if (isGameOver) {
                 "MATCH OVER!"
             } else if (uiState.gameMode == GameMode.VS_PLAYER) {
@@ -258,18 +260,18 @@ fun RevealScreen(
                     else -> "DRAW!"
                 }
             }
-            
+
             val bannerColor = when {
                 isGameOver -> NeonMagenta
                 result.player1Outcome == BattleOutcome.WIN -> NeonGreen
                 result.player1Outcome == BattleOutcome.LOSE -> NeonRed
                 else -> NeonOrange
             }
-            
+
             Text(
                 text = bannerText,
                 style = TextStyle(
-                    fontSize = 32.sp,
+                    fontSize = if (isCompact) 26.sp else 32.sp,
                     fontWeight = FontWeight.Bold,
                     color = bannerColor,
                     letterSpacing = 4.sp,
@@ -283,12 +285,13 @@ fun RevealScreen(
             enter = fadeIn(tween(500)),
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 64.dp, start = 32.dp, end = 32.dp)
+                .windowInsetsPadding(WindowInsets.navigationBars)
+                .padding(bottom = bottomPad, start = hPad, end = hPad)
         ) {
             val isGameOver = uiState.matchWinner != null || uiState.roundCount >= MAX_ROUNDS
             val buttonText = if (isGameOver) "VIEW RESULTS" else "NEXT ROUND"
             val buttonColor = if (isGameOver) NeonMagenta else NeonCyan
-            
+
             GameButton(
                 label = buttonText,
                 color = buttonColor,
@@ -305,4 +308,3 @@ fun RevealScreen(
         }
     }
 }
-

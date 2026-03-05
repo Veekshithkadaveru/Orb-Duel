@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.krafted.orbduel.game.Element
@@ -25,13 +26,13 @@ import app.krafted.orbduel.ui.theme.color
 import app.krafted.orbduel.ui.theme.drawableRes
 
 @Composable
-fun OrbDisplay(element: Element?, placeholderColor: Color) {
+fun OrbDisplay(element: Element?, placeholderColor: Color, size: Dp = 64.dp) {
     if (element != null) {
         Image(
             painter = painterResource(element.drawableRes),
             contentDescription = element.displayName,
             modifier = Modifier
-                .size(64.dp)
+                .size(size)
                 .shadow(
                     8.dp,
                     CircleShape,
@@ -44,7 +45,7 @@ fun OrbDisplay(element: Element?, placeholderColor: Color) {
     } else {
         Box(
             modifier = Modifier
-                .size(64.dp)
+                .size(size)
                 .clip(CircleShape)
                 .background(CardSurface)
                 .border(2.dp, placeholderColor, CircleShape),

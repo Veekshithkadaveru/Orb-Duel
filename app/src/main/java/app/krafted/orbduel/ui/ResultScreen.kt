@@ -14,10 +14,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,6 +41,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -99,6 +103,15 @@ fun ResultScreen(
     var showStats by remember { mutableStateOf(false) }
     var showButtons by remember { mutableStateOf(false) }
 
+    val config = LocalConfiguration.current
+    val isCompact = config.screenHeightDp < 640
+    val isNarrow = config.screenWidthDp < 360
+    val hPad = if (isNarrow) 20.dp else 28.dp
+    val vPad = if (isCompact) 20.dp else 32.dp
+    val trophySize = if (isCompact) 42.sp else 56.sp
+    val winnerNameSize = if (isNarrow) 26.sp else 32.sp
+    val buttonHeight = if (isCompact) 48.dp else 54.dp
+
     LaunchedEffect(Unit) {
         titleScale.animateTo(1f, spring(dampingRatio = 0.55f, stiffness = 120f))
         delay(300)
@@ -125,7 +138,8 @@ fun ResultScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 28.dp, vertical = 32.dp),
+                .windowInsetsPadding(WindowInsets.systemBars)
+                .padding(horizontal = hPad, vertical = vPad),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
@@ -152,7 +166,7 @@ fun ResultScreen(
                     Text(
                         text = if (isDraw) "NO WINNER" else "🏆",
                         style = TextStyle(
-                            fontSize = if (isDraw) 36.sp else 56.sp,
+                            fontSize = if (isDraw) (trophySize * 0.64f) else trophySize,
                             color = accentColor.copy(alpha = bloomAlpha),
                             shadow = Shadow(color = accentColor, blurRadius = 120f)
                         )
@@ -160,7 +174,7 @@ fun ResultScreen(
                     if (!isDraw) {
                         Text(
                             text = "🏆",
-                            style = TextStyle(fontSize = 56.sp)
+                            style = TextStyle(fontSize = trophySize)
                         )
                     }
                 }
@@ -175,7 +189,7 @@ fun ResultScreen(
                     Text(
                         text = winnerName ?: "STALEMATE",
                         style = TextStyle(
-                            fontSize = 32.sp,
+                            fontSize = winnerNameSize,
                             fontWeight = FontWeight.Black,
                             color = accentColor.copy(alpha = bloomAlpha * 0.8f),
                             letterSpacing = 3.sp,
@@ -186,7 +200,7 @@ fun ResultScreen(
                         text = winnerName ?: "STALEMATE",
                         style = TextStyle(
                             brush = titleBrush,
-                            fontSize = 32.sp,
+                            fontSize = winnerNameSize,
                             fontWeight = FontWeight.Black,
                             letterSpacing = 3.sp,
                             shadow = Shadow(color = accentColor, blurRadius = 14f)
@@ -290,9 +304,9 @@ fun ResultScreen(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    GameButton(label = "PLAY AGAIN", color = NeonMagenta, height = 54.dp, onClick = onPlayAgain)
-                    GameButton(label = "MAIN MENU", color = NeonCyan, height = 54.dp, onClick = onMainMenu)
-                    GameButton(label = "LEADERBOARD", color = NeonOrange, height = 54.dp, onClick = onLeaderboard)
+                    GameButton(label = "PLAY AGAIN", color = NeonMagenta, height = buttonHeight, onClick = onPlayAgain)
+                    GameButton(label = "MAIN MENU", color = NeonCyan, height = buttonHeight, onClick = onMainMenu)
+                    GameButton(label = "LEADERBOARD", color = NeonOrange, height = buttonHeight, onClick = onLeaderboard)
                 }
             }
 

@@ -1,5 +1,9 @@
 package app.krafted.orbduel.ui.components
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -14,7 +18,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -24,6 +27,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.krafted.orbduel.game.Element
+import app.krafted.orbduel.ui.theme.color
+import app.krafted.orbduel.ui.theme.drawableRes
 
 @Composable
 fun OrbSelectionRow(
@@ -39,7 +44,7 @@ fun OrbSelectionRow(
     ) {
         items(Element.entries) { element ->
             val isSelected = element == selectedOrb
-            
+
             val targetAlpha = when {
                 !enabled -> 0.3f
                 isSelected -> 1f
@@ -47,17 +52,17 @@ fun OrbSelectionRow(
             }
             val targetScale = if (isSelected) 1.2f else 1.0f
 
-            val animatedAlpha by androidx.compose.animation.core.animateFloatAsState(
+            val animatedAlpha by animateFloatAsState(
                 targetValue = targetAlpha,
-                animationSpec = androidx.compose.animation.core.tween(200),
+                animationSpec = tween(200),
                 label = "orbAlpha"
             )
-            
-            val animatedScale by androidx.compose.animation.core.animateFloatAsState(
+
+            val animatedScale by animateFloatAsState(
                 targetValue = targetScale,
-                animationSpec = androidx.compose.animation.core.spring(
-                    dampingRatio = androidx.compose.animation.core.Spring.DampingRatioMediumBouncy,
-                    stiffness = androidx.compose.animation.core.Spring.StiffnessLow
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                    stiffness = Spring.StiffnessLow
                 ),
                 label = "orbScale"
             )
@@ -81,7 +86,12 @@ fun OrbSelectionRow(
                         .then(
                             if (isSelected) {
                                 Modifier
-                                    .shadow(8.dp, CircleShape, ambientColor = element.color, spotColor = element.color)
+                                    .shadow(
+                                        8.dp,
+                                        CircleShape,
+                                        ambientColor = element.color,
+                                        spotColor = element.color
+                                    )
                                     .border(2.dp, element.color, CircleShape)
                             } else {
                                 Modifier

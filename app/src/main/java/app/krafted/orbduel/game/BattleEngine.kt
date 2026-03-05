@@ -44,13 +44,24 @@ fun resolveRound(
 ): BattleUiState {
     val p1Outcome = resolveBattle(p1Orb, p2Orb)
 
+    val p2Outcome = resolveBattle(p2Orb, p1Orb)
+
     val damageTakenByP1: Int
     val damageTakenByP2: Int
 
-    when (p1Outcome) {
-        BattleOutcome.WIN  -> { damageTakenByP1 = 0;                      damageTakenByP2 = DamageValues.WIN_DAMAGE  }
-        BattleOutcome.LOSE -> { damageTakenByP1 = DamageValues.WIN_DAMAGE; damageTakenByP2 = 0                       }
-        BattleOutcome.DRAW -> { damageTakenByP1 = DamageValues.DRAW_DAMAGE; damageTakenByP2 = DamageValues.DRAW_DAMAGE }
+    if (p1Outcome == BattleOutcome.WIN) {
+        damageTakenByP1 = 0
+        damageTakenByP2 = DamageValues.WIN_DAMAGE
+    } else if (p2Outcome == BattleOutcome.WIN) {
+        damageTakenByP1 = DamageValues.WIN_DAMAGE
+        damageTakenByP2 = 0
+    } else if (p1Outcome == BattleOutcome.DRAW) {
+        damageTakenByP1 = DamageValues.DRAW_DAMAGE
+        damageTakenByP2 = DamageValues.DRAW_DAMAGE
+    } else {
+        // Double LOSE (neutral matchup)
+        damageTakenByP1 = DamageValues.LOSE_DAMAGE
+        damageTakenByP2 = DamageValues.LOSE_DAMAGE
     }
 
     val newP1Hp = (currentState.player1Hp - damageTakenByP1).coerceAtLeast(0)
@@ -69,7 +80,7 @@ fun resolveRound(
         else                         -> null
     }
 
-    val gameOver = winner != null || maxRoundsReached
+    val gameOver = winner != null || maxRoundsReached || (newP1Hp <= 0 && newP2Hp <= 0)
 
     return currentState.copy(
         player1Hp          = newP1Hp,

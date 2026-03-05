@@ -1,6 +1,7 @@
 package app.krafted.orbduel.ui.components
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -16,9 +17,11 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -58,10 +61,10 @@ fun HpBar(
         label = "hp-bar-color"
     )
 
-    val shakeOffset = androidx.compose.runtime.remember { androidx.compose.animation.core.Animatable(0f) }
-    var previousHp by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(hp) }
+    val shakeOffset = remember { Animatable(0f) }
+    var previousHp by remember { mutableStateOf(hp) }
 
-    androidx.compose.runtime.LaunchedEffect(hp) {
+    LaunchedEffect(hp) {
         if (hp < previousHp) {
             // Shake animation
             shakeOffset.animateTo(15f, animationSpec = tween(50))

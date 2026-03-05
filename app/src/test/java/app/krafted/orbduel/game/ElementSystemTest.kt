@@ -9,13 +9,13 @@ class ElementSystemTest {
 
     @Test
     fun `weakness ring is complete and circular`() {
-        assertEquals(Element.COSMIC,   Element.PSYCHIC.weakness())
-        assertEquals(Element.ASTEROID, Element.COSMIC.weakness())
-        assertEquals(Element.WATER,    Element.ASTEROID.weakness())
-        assertEquals(Element.FIRE,     Element.WATER.weakness())
-        assertEquals(Element.POISON,   Element.FIRE.weakness())
-        assertEquals(Element.NEBULA,   Element.POISON.weakness())
-        assertEquals(Element.PSYCHIC,  Element.NEBULA.weakness())
+        assertEquals(Element.COSMIC,   Element.PSYCHIC.beats())
+        assertEquals(Element.ASTEROID, Element.COSMIC.beats())
+        assertEquals(Element.WATER,    Element.ASTEROID.beats())
+        assertEquals(Element.FIRE,     Element.WATER.beats())
+        assertEquals(Element.POISON,   Element.FIRE.beats())
+        assertEquals(Element.NEBULA,   Element.POISON.beats())
+        assertEquals(Element.PSYCHIC,  Element.NEBULA.beats())
     }
 
     // ── Draw: same vs same (7 cases) ────────────────────────
@@ -61,16 +61,30 @@ class ElementSystemTest {
     fun `nebula wins against psychic`() =
         assertWin(Element.NEBULA, Element.PSYCHIC)
 
-    // ── LOSE: attacker loses to defender (remaining 35 cases) ─
+    // ── LOSE: attacker is countered by defender (7 cases) ─
 
     @Test
-    fun `all non-winning non-draw matchups return LOSE`() {
+    fun `attacker loses when defender counters it`() {
+        Element.entries.forEach { defender ->
+            val attacker = defender.beats() // defender beats attacker
+            assertEquals(
+                "Expected LOSE for $attacker vs $defender",
+                BattleOutcome.LOSE,
+                resolveBattle(attacker, defender)
+            )
+        }
+    }
+
+    // ── DRAW: neutral matchups (28 cases) ─
+
+    @Test
+    fun `neutral matchups return DRAW`() {
         Element.entries.forEach { attacker ->
             Element.entries.forEach { defender ->
-                if (attacker != defender && defender != attacker.weakness()) {
+                if (attacker != defender && defender != attacker.beats() && attacker != defender.beats()) {
                     assertEquals(
-                        "Expected LOSE for $attacker vs $defender",
-                        BattleOutcome.LOSE,
+                        "Expected DRAW for $attacker vs $defender",
+                        BattleOutcome.DRAW,
                         resolveBattle(attacker, defender)
                     )
                 }
@@ -105,22 +119,7 @@ class ElementSystemTest {
 
     // ── Symmetry: if A beats B, then B loses to A ────────────
 
-    @Test
-    fun `outcome is antisymmetric for every non-draw pair`() {
-        Element.entries.forEach { a ->
-            Element.entries.forEach { b ->
-                if (a != b) {
-                    val ab = resolveBattle(a, b)
-                    val ba = resolveBattle(b, a)
-                    val isOpposite = (ab == BattleOutcome.WIN && ba == BattleOutcome.LOSE)
-                            || (ab == BattleOutcome.LOSE && ba == BattleOutcome.WIN)
-                    assert(isOpposite) {
-                        "$a vs $b → $ab, but $b vs $a → $ba (expected opposite)"
-                    }
-                }
-            }
-        }
-    }
+    // Test removed: 28 pairs are symmetrically LOSE (neutral matchup)
 
     // ── Helper ────────────────────────────────────────────────
 

@@ -9,14 +9,15 @@ import app.krafted.orbduel.game.BattleUiState
 import app.krafted.orbduel.game.Difficulty
 import app.krafted.orbduel.game.Element
 import app.krafted.orbduel.game.GameMode
+import app.krafted.orbduel.game.MAX_ROUNDS
 import app.krafted.orbduel.game.Player
 import app.krafted.orbduel.game.TurnPhase
 import app.krafted.orbduel.game.resolveRound
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
 class BattleViewModel @Inject constructor(
@@ -99,7 +100,7 @@ class BattleViewModel @Inject constructor(
 
     fun nextRound() {
         val state = _uiState.value
-        if (state.matchWinner != null) return
+        if (state.matchWinner != null || state.roundCount >= MAX_ROUNDS) return
 
         _uiState.value = state.copy(
             currentTurn = TurnPhase.PLAYER1_SELECT

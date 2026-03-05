@@ -2,12 +2,6 @@ package app.krafted.orbduel.ui
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -15,7 +9,6 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,8 +18,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -53,6 +44,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.krafted.orbduel.R
 import app.krafted.orbduel.game.GameMode
 import app.krafted.orbduel.game.Player
+import app.krafted.orbduel.ui.components.DecorativeDotLabel
+import app.krafted.orbduel.ui.components.GameButton
+import app.krafted.orbduel.ui.components.NeonDivider
+import app.krafted.orbduel.ui.components.rememberBloomAlpha
+import app.krafted.orbduel.ui.components.rememberShimmerBrush
 import app.krafted.orbduel.ui.theme.CardSurface
 import app.krafted.orbduel.ui.theme.DarkBg
 import app.krafted.orbduel.ui.theme.GlowYellow
@@ -86,26 +82,17 @@ fun ResultScreen(
         else -> NeonCyan
     }
 
-    val infiniteTransition = rememberInfiniteTransition(label = "result")
-
-    val bloomAlpha by infiniteTransition.animateFloat(
-        initialValue = 0.06f,
-        targetValue = 0.22f,
-        animationSpec = infiniteRepeatable(
-            tween(1600, easing = FastOutSlowInEasing),
-            RepeatMode.Reverse
-        ),
-        label = "bloom"
+    val bloomAlpha = rememberBloomAlpha(
+        minAlpha = 0.06f,
+        maxAlpha = 0.22f,
+        durationMs = 1600,
+        label = "result"
     )
 
-    val shimmer by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            tween(3000, easing = LinearEasing),
-            RepeatMode.Restart
-        ),
-        label = "shimmer"
+    val titleBrush = rememberShimmerBrush(
+        accentColor = accentColor,
+        shimmerDurationMs = 3000,
+        label = "result"
     )
 
     val titleScale = remember { Animatable(0f) }
@@ -118,20 +105,6 @@ fun ResultScreen(
         showStats = true
         delay(400)
         showButtons = true
-    }
-
-    val titleBrush = if (shimmer < 0.05f || shimmer > 0.95f) {
-        Brush.linearGradient(listOf(accentColor, Color.White, accentColor))
-    } else {
-        Brush.linearGradient(
-            colorStops = arrayOf(
-                0f to accentColor,
-                (shimmer - 0.12f).coerceAtLeast(0.01f) to accentColor.copy(alpha = 0.7f),
-                shimmer to Color.White,
-                (shimmer + 0.12f).coerceAtMost(0.99f) to accentColor.copy(alpha = 0.7f),
-                1f to accentColor
-            )
-        )
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -194,16 +167,7 @@ fun ResultScreen(
 
                 Spacer(Modifier.height(8.dp))
 
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(0.65f)
-                        .height(1.dp)
-                        .background(
-                            Brush.horizontalGradient(
-                                listOf(Color.Transparent, accentColor, Color.Transparent)
-                            )
-                        )
-                )
+                NeonDivider(color = accentColor, widthFraction = 0.65f)
 
                 Spacer(Modifier.height(12.dp))
 
@@ -273,48 +237,16 @@ fun ResultScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center
                     ) {
-                        repeat(3) {
-                            Box(
-                                Modifier
-                                    .size(3.dp)
-                                    .background(accentColor, RoundedCornerShape(2.dp))
-                            )
-                            Spacer(Modifier.width(3.dp))
-                        }
-                        Text(
+                        DecorativeDotLabel(
                             text = "MATCH SUMMARY",
-                            style = TextStyle(
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = accentColor,
-                                letterSpacing = 4.sp,
-                                shadow = Shadow(color = accentColor, blurRadius = 10f)
-                            )
+                            color = accentColor,
+                            dotSize = 3.dp,
+                            fontSize = 10,
+                            letterSpacing = 4
                         )
-                        repeat(3) {
-                            Spacer(Modifier.width(3.dp))
-                            Box(
-                                Modifier
-                                    .size(3.dp)
-                                    .background(accentColor, RoundedCornerShape(2.dp))
-                            )
-                        }
                     }
 
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(1.dp)
-                            .background(
-                                Brush.horizontalGradient(
-                                    listOf(
-                                        Color.Transparent,
-                                        accentColor.copy(alpha = 0.3f),
-                                        Color.Transparent
-                                    )
-                                )
-                            )
-                    )
+                    NeonDivider(color = accentColor.copy(alpha = 0.3f))
 
                     StatRow(label = "ROUNDS", value = "${uiState.roundCount}", accent = accentColor)
 
@@ -358,9 +290,9 @@ fun ResultScreen(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    GameButton(label = "PLAY AGAIN", color = NeonMagenta, onClick = onPlayAgain)
-                    GameButton(label = "MAIN MENU", color = NeonCyan, onClick = onMainMenu)
-                    GameButton(label = "LEADERBOARD", color = NeonOrange, onClick = onLeaderboard)
+                    GameButton(label = "PLAY AGAIN", color = NeonMagenta, height = 54.dp, onClick = onPlayAgain)
+                    GameButton(label = "MAIN MENU", color = NeonCyan, height = 54.dp, onClick = onMainMenu)
+                    GameButton(label = "LEADERBOARD", color = NeonOrange, height = 54.dp, onClick = onLeaderboard)
                 }
             }
 
@@ -395,68 +327,5 @@ private fun StatRow(label: String, value: String, accent: Color) {
                 shadow = Shadow(color = accent, blurRadius = 8f)
             )
         )
-    }
-}
-
-@Composable
-private fun GameButton(
-    label: String,
-    color: Color,
-    onClick: () -> Unit
-) {
-    val buttonShape = RoundedCornerShape(4.dp)
-    val gradient = Brush.verticalGradient(
-        colors = listOf(color.copy(alpha = 0.30f), color.copy(alpha = 0.06f))
-    )
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(54.dp)
-            .shadow(
-                elevation = 14.dp,
-                shape = buttonShape,
-                spotColor = color,
-                ambientColor = color.copy(alpha = 0.45f)
-            )
-            .clip(buttonShape)
-            .background(gradient)
-            .border(1.5.dp, color, buttonShape)
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = "◆",
-                style = TextStyle(
-                    fontSize = 7.sp,
-                    color = color,
-                    shadow = Shadow(color = color, blurRadius = 12f)
-                )
-            )
-            Spacer(Modifier.width(12.dp))
-            Text(
-                text = label,
-                style = TextStyle(
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White,
-                    letterSpacing = 3.sp,
-                    shadow = Shadow(color = color, blurRadius = 16f)
-                )
-            )
-            Spacer(Modifier.width(12.dp))
-            Text(
-                text = "◆",
-                style = TextStyle(
-                    fontSize = 7.sp,
-                    color = color,
-                    shadow = Shadow(color = color, blurRadius = 12f)
-                )
-            )
-        }
     }
 }

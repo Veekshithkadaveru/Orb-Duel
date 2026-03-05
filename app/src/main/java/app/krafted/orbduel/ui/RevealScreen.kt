@@ -53,13 +53,17 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.krafted.orbduel.R
 import app.krafted.orbduel.game.BattleOutcome
+import app.krafted.orbduel.game.GameMode
+import app.krafted.orbduel.game.MAX_ROUNDS
 import app.krafted.orbduel.game.TurnPhase
+import app.krafted.orbduel.ui.components.GameButton
 import app.krafted.orbduel.ui.theme.DarkBg
 import app.krafted.orbduel.ui.theme.NeonCyan
 import app.krafted.orbduel.ui.theme.NeonGreen
 import app.krafted.orbduel.ui.theme.NeonMagenta
 import app.krafted.orbduel.ui.theme.NeonOrange
 import app.krafted.orbduel.ui.theme.NeonRed
+import app.krafted.orbduel.ui.theme.drawableRes
 import app.krafted.orbduel.viewmodel.BattleViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -86,7 +90,7 @@ fun RevealScreen(
     val damageAlpha = remember { Animatable(0f) }
     
     var showDamage by remember { mutableStateOf(false) }
-    var showDraw by remember { mutableStateOf(false) }
+    var showBanner by remember { mutableStateOf(false) }
     var showNextButton by remember { mutableStateOf(false) }
 
     LaunchedEffect(result) {
@@ -120,16 +124,16 @@ fun RevealScreen(
                 launch { p2OffsetX.animateTo(screenWidthPx, tween(500)) }
                 launch { p1OffsetX.animateTo(0f, tween(500)) }
                 showDamage = true
-                showDraw = true
+                showBanner = true
             }
             BattleOutcome.LOSE -> {
                 launch { p1OffsetX.animateTo(-screenWidthPx, tween(500)) }
                 launch { p2OffsetX.animateTo(0f, tween(500)) }
                 showDamage = true
-                showDraw = true
+                showBanner = true
             }
             BattleOutcome.DRAW -> {
-                showDraw = true
+                showBanner = true
             }
         }
         if (result.player1Outcome != BattleOutcome.DRAW) {
@@ -143,9 +147,6 @@ fun RevealScreen(
         delay(600)
         showNextButton = true
 
-        if (uiState.currentTurn != TurnPhase.REVEAL && uiState.currentTurn != TurnPhase.RESULT) {
-
-        }
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -236,15 +237,15 @@ fun RevealScreen(
         }
 
         AnimatedVisibility(
-            visible = showDraw,
+            visible = showBanner,
             enter = fadeIn(tween(500)),
             modifier = Modifier.align(Alignment.Center).offset(y = (-100).dp)
         ) {
-            val isGameOver = uiState.matchWinner != null
+            val isGameOver = uiState.matchWinner != null || uiState.roundCount >= MAX_ROUNDS
             
             val bannerText = if (isGameOver) {
                 "MATCH OVER!"
-            } else if (uiState.gameMode == app.krafted.orbduel.game.GameMode.VS_PLAYER) {
+            } else if (uiState.gameMode == GameMode.VS_PLAYER) {
                 when (result.player1Outcome) {
                     BattleOutcome.WIN -> "${uiState.player1Name.uppercase()} WINS!"
                     BattleOutcome.LOSE -> "${uiState.player2Name.uppercase()} WINS!"
@@ -284,7 +285,7 @@ fun RevealScreen(
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 64.dp, start = 32.dp, end = 32.dp)
         ) {
-            val isGameOver = uiState.matchWinner != null
+            val isGameOver = uiState.matchWinner != null || uiState.roundCount >= MAX_ROUNDS
             val buttonText = if (isGameOver) "VIEW RESULTS" else "NEXT ROUND"
             val buttonColor = if (isGameOver) NeonMagenta else NeonCyan
             
@@ -305,70 +306,3 @@ fun RevealScreen(
     }
 }
 
-@Composable
-private fun GameButton(
-    label: String,
-    color: Color,
-    enabled: Boolean,
-    onClick: () -> Unit
-) {
-    val buttonShape = RoundedCornerShape(4.dp)
-    val alpha = if (enabled) 1f else 0.35f
-    val displayColor = color.copy(alpha = alpha)
-    val gradient = Brush.verticalGradient(
-        colors = listOf(displayColor.copy(alpha = 0.30f), displayColor.copy(alpha = 0.06f))
-    )
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(58.dp)
-            .shadow(
-                elevation = 14.dp,
-                shape = buttonShape,
-                spotColor = displayColor,
-                ambientColor = displayColor.copy(alpha = 0.45f)
-            )
-            .clip(buttonShape)
-            .background(gradient)
-            .border(1.5.dp, displayColor, buttonShape)
-            .then(
-                if (enabled) Modifier.clickable(onClick = onClick) else Modifier
-            ),
-        contentAlignment = Alignment.Center
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = "◆",
-                style = TextStyle(
-                    fontSize = 7.sp,
-                    color = displayColor,
-                    shadow = Shadow(color = displayColor, blurRadius = 12f)
-                )
-            )
-            Spacer(Modifier.width(12.dp))
-            Text(
-                text = label,
-                style = TextStyle(
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White.copy(alpha = alpha),
-                    letterSpacing = 3.sp,
-                    shadow = Shadow(color = displayColor, blurRadius = 16f)
-                )
-            )
-            Spacer(Modifier.width(12.dp))
-            Text(
-                text = "◆",
-                style = TextStyle(
-                    fontSize = 7.sp,
-                    color = displayColor,
-                    shadow = Shadow(color = displayColor, blurRadius = 12f)
-                )
-            )
-        }
-    }
-}

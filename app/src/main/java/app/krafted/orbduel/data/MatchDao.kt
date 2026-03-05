@@ -11,19 +11,17 @@ interface MatchDao {
     @Insert
     suspend fun insertMatch(record: MatchRecord)
 
-    @Query("SELECT * FROM match_records ORDER BY timestamp DESC LIMIT 10")
-    fun getTopRecords(): Flow<List<MatchRecord>>
-
     @Query(
         """
-        SELECT winnerName as playerName, 
-               COUNT(id) as wins, 
-               MIN(roundsPlayed) as fastestRound, 
-               MAX(remainingHp) as highestHp 
-        FROM match_records 
-        WHERE winnerName != 'STALEMATE' AND winnerName != 'AI' 
-        GROUP BY winnerName 
-        ORDER BY wins DESC, fastestRound ASC, highestHp DESC 
+        SELECT winnerName as playerName,
+               COUNT(id) as wins,
+               SUM(CASE WHEN roundsPlayed < 10 THEN 1 ELSE 0 END) as hpKnockouts,
+               MIN(roundsPlayed) as fastestRound,
+               MAX(remainingHp) as highestHp
+        FROM match_records
+        WHERE winnerName != 'STALEMATE' AND NOT (gameMode = 'VS_AI' AND winnerName = 'AI')
+        GROUP BY winnerName
+        ORDER BY hpKnockouts DESC, wins DESC, fastestRound ASC, highestHp DESC
         LIMIT 10
     """
     )
